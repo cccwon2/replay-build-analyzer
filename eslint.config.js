@@ -1,19 +1,28 @@
 import js from "@eslint/js";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+import tseslint from "typescript-eslint";
 
-export default [
+export default tseslint.config(
+  { ignores: ["dist"] },
   {
-    ignores: ["dist"],
-    extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
     },
-    plugins: ["react-hooks"], // react-hooks 플러그인만 사용
-    rules: {
-      ...reactHooks.configs.recommended.rules, // React Hooks 규칙
+    plugins: {
+      "react-hooks": reactHooks,
+      "react-refresh": reactRefresh,
     },
-  },
-];
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      "react-refresh/only-export-components": [
+        "warn",
+        { allowConstantExport: true },
+      ],
+    },
+  }
+);
