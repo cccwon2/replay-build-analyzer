@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { AnalysisResult, BuildOrder, Player } from "./types/analysis";
+import { AnalysisResult, Player, GameEvent } from "./types/analysis";
 import GameChart from "./components/GameChart";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -10,7 +10,7 @@ const App = () => {
     null
   );
   const [players, setPlayers] = useState<Player[]>([]);
-  const [buildOrders, setBuildOrders] = useState<BuildOrder[]>([]);
+  const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
   const chartRef = useRef<HTMLDivElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +35,7 @@ const App = () => {
 
       setAnalysisResult(result);
       setPlayers(result.players);
-      setBuildOrders(result.buildOrders);
+      setGameEvents(result.gameEvents);
     } catch (error) {
       console.error("Error uploading file:", error);
     }
@@ -56,50 +56,58 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-          Upload StarCraft Replay File
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-8">
+      <div className="bg-white p-8 rounded-2xl shadow-lg max-w-5xl mx-auto">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6">
+          스타크래프트 리플레이 분석기
         </h2>
-        <input
-          type="file"
-          accept=".rep"
-          onChange={handleFileChange}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-        />
+        <div className="mb-6">
+          <label
+            htmlFor="file-upload"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            리플레이 파일 업로드
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            accept=".rep"
+            onChange={handleFileChange}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition duration-150 ease-in-out"
+          />
+        </div>
         <button
           onClick={handleUpload}
-          className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+          className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
         >
-          Analyze Replay
+          리플레이 분석하기
         </button>
 
         {analysisResult && (
-          <div className="mt-6">
-            <h3 className="text-xl font-bold text-gray-600">Analysis Result</h3>
-            <p className="text-gray-500">
-              Game Version: {analysisResult.gameVersion}
+          <div className="mt-8 bg-gray-50 p-6 rounded-xl">
+            <h3 className="text-2xl font-bold text-gray-700 mb-4">분석 결과</h3>
+            <p className="text-gray-600">
+              게임 버전: {analysisResult.gameVersion}
             </p>
-            <p className="text-gray-500">Map Name: {analysisResult.mapName}</p>
+            <p className="text-gray-600">맵 이름: {analysisResult.mapName}</p>
 
-            <h4 className="text-lg font-semibold mt-4 text-gray-600">
-              Players:
+            <h4 className="text-xl font-semibold mt-6 mb-4 text-gray-700">
+              플레이어:
             </h4>
-            {/* 그리드 레이아웃으로 표시 */}
-            <div className="grid grid-cols-3 gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {players.map((player, index) => (
                 <div
                   key={index}
-                  className="bg-gray-100 p-4 rounded-lg shadow-sm flex flex-col justify-center items-center"
+                  className="bg-white p-6 rounded-xl shadow-md transition duration-300 ease-in-out transform hover:scale-105"
                 >
-                  <span className="text-lg font-semibold text-gray-700">
+                  <span className="text-xl font-bold text-gray-800 block mb-2">
                     {player.Name}
                   </span>
-                  <span className="text-sm text-gray-500">
-                    Race: {player.Race.Name}
+                  <span className="text-sm text-gray-600 block mb-2">
+                    종족: {player.Race.Name}
                   </span>
                   <span
-                    className="mt-1 inline-block py-1 px-3 rounded-full text-white"
+                    className="inline-block py-1 px-3 rounded-full text-sm font-semibold text-white"
                     style={{ backgroundColor: player.Color.Name }}
                   >
                     {player.Color.Name}
@@ -110,14 +118,14 @@ const App = () => {
           </div>
         )}
 
-        {players.length > 0 && buildOrders.length > 0 && (
-          <div ref={chartRef}>
-            <GameChart buildOrders={buildOrders} players={players} />
+        {players.length > 0 && gameEvents.length > 0 && (
+          <div ref={chartRef} className="mt-8">
+            <GameChart gameEvents={gameEvents} players={players} />
             <button
               onClick={handleDownloadPdf}
-              className="mt-4 w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600"
+              className="mt-6 w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
             >
-              Download as PDF
+              PDF로 다운로드
             </button>
           </div>
         )}
