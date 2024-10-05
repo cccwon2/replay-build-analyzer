@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { AnalysisResult, Player, GameEvent } from "./types/analysis";
-import GameChart from "./components/GameChart";
+import GameAnalysisOverview from "./components/GameAnalysisOverview";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -120,7 +120,7 @@ const App = () => {
 
         {players.length > 0 && gameEvents.length > 0 && (
           <div ref={chartRef} className="mt-8">
-            <GameChart gameEvents={gameEvents} players={players} />
+            <GameAnalysisOverview gameEvents={gameEvents} players={players} />
             <button
               onClick={handleDownloadPdf}
               className="mt-6 w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
